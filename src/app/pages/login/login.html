@@ -1,0 +1,85 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <h1>🚀 Orbit</h1>
+      <p>Gestión de Proyectos y Tareas</p>
+    </div>
+
+    <div class="login-content">
+      <h2>{{ isRegistering ? 'Crear Cuenta' : 'Iniciar Sesión' }}</h2>
+
+      <!-- Mensaje de éxito -->
+      <div *ngIf="successMessage" class="alert alert-success">
+        ✓ {{ successMessage }}
+      </div>
+
+      <!-- Mensaje de error -->
+      <div *ngIf="errorMessage" class="alert alert-error">
+        ✗ {{ errorMessage }}
+      </div>
+
+      <!-- Formulario -->
+      <form (ngSubmit)="loginOrRegister()" class="login-form">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            [(ngModel)]="email"
+            name="email"
+            placeholder="tu@email.com"
+            [disabled]="loading"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input
+            id="password"
+            type="password"
+            [(ngModel)]="password"
+            name="password"
+            placeholder="Mínimo 6 caracteres"
+            [disabled]="loading"
+          />
+          <small *ngIf="isRegistering && password && password.length < 6">
+            Mínimo 6 caracteres ({{ password.length }}/6)
+          </small>
+        </div>
+
+        <div class="form-group" *ngIf="isRegistering">
+          <label for="passwordConfirm">Confirmar Contraseña</label>
+          <input
+            id="passwordConfirm"
+            type="password"
+            [(ngModel)]="passwordConfirm"
+            name="passwordConfirm"
+            placeholder="Confirma tu contraseña"
+            [disabled]="loading"
+          />
+          <small *ngIf="password && passwordConfirm && password !== passwordConfirm" class="error">
+            Las contraseñas no coinciden
+          </small>
+        </div>
+
+        <button
+          type="submit"
+          class="btn-submit"
+          [disabled]="loading || !isFormValid()"
+        >
+          {{ loading ? 'Procesando...' : (isRegistering ? 'Crear Cuenta' : 'Iniciar Sesión') }}
+        </button>
+      </form>
+
+      <!-- Cambiar modo -->
+      <div class="login-footer">
+        <p>
+          {{ isRegistering ? '¿Ya tienes cuenta?' : '¿No tienes cuenta?' }}
+          <button type="button" class="link" (click)="toggleMode()">
+            {{ isRegistering ? 'Iniciar Sesión' : 'Registrarse' }}
+          </button>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

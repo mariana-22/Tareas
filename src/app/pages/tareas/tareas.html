@@ -1,0 +1,109 @@
+<div class="tareas-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1>📝 Tareas</h1>
+      <p>Organiza y monitorea el estado de tus tareas</p>
+    </div>
+    <button class="btn-primary" (click)="showForm = !showForm">
+      {{ showForm ? '✕ Cerrar' : '+ Nueva Tarea' }}
+    </button>
+  </div>
+
+  <!-- Formulario crear/editar -->
+  <div class="form-section" *ngIf="showForm">
+    <div class="form-card">
+      <h2>{{ editing ? 'Editar Tarea' : 'Crear Nueva Tarea' }}</h2>
+      
+      <form (ngSubmit)="guardarTarea()" class="task-form">
+        <div class="form-group">
+          <label for="titulo">Título de la Tarea</label>
+          <input 
+            id="titulo"
+            type="text" 
+            [(ngModel)]="newTarea.titulo" 
+            name="titulo"
+            placeholder="¿Qué necesitas hacer?"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="descripcion">Descripción</label>
+          <textarea 
+            id="descripcion"
+            [(ngModel)]="newTarea.descripcion" 
+            name="descripcion"
+            placeholder="Agrega detalles sobre esta tarea..."
+            rows="4"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="estado">Estado</label>
+          <select [(ngModel)]="newTarea.estado" name="estado" id="estado">
+            <option value="pendiente">🔵 Pendiente</option>
+            <option value="en progreso">🟡 En Progreso</option>
+            <option value="completada">✅ Completada</option>
+          </select>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-success">
+            {{ editing ? 'Actualizar Tarea' : 'Crear Tarea' }}
+          </button>
+          <button type="button" class="btn-secondary" (click)="cancelarEdicion()" *ngIf="editing">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Filtros por estado -->
+  <div class="filters-section">
+    <button 
+      *ngFor="let estado of estadosFiltro"
+      class="filter-btn"
+      [class.active]="filtroEstado === estado.value"
+      (click)="filtroEstado = estado.value"
+    >
+      {{ estado.label }} <span class="count">({{ contarPorEstado(estado.value) }})</span>
+    </button>
+  </div>
+
+  <!-- Lista de tareas -->
+  <div class="tasks-section">
+    <div *ngIf="tareasFiltradas.length > 0" class="tasks-grid">
+      <div class="task-item" [class]="'status-' + (tarea.estado || 'pendiente')" *ngFor="let tarea of tareasFiltradas">
+        <div class="task-header">
+          <div>
+            <h3>{{ tarea.titulo }}</h3>
+            <span class="status-badge" [class]="'badge-' + (tarea.estado || 'pendiente')">
+              {{ tarea.estado || 'pendiente' | titlecase }}
+            </span>
+          </div>
+          <div class="task-actions">
+            <button class="btn-icon edit" (click)="editarTarea(tarea)" title="Editar">✎</button>
+            <button class="btn-icon delete" (click)="eliminarTarea(tarea.id)" title="Eliminar">🗑</button>
+          </div>
+        </div>
+        <p class="task-description">{{ tarea.descripcion || 'Sin descripción' }}</p>
+        <div class="task-meta">
+          <span class="date">Creada: {{ tarea.created_at | date: 'short' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="tareasFiltradas.length === 0 && tareas.length > 0" class="empty-message">
+      <p>No hay tareas en este estado</p>
+    </div>
+
+    <div *ngIf="tareas.length === 0" class="empty-state">
+      <div class="empty-icon">📝</div>
+      <h3>No tienes tareas</h3>
+      <p>Crea tu primera tarea para empezar a organizarte</p>
+      <button class="btn-primary" (click)="showForm = true">+ Crear Tarea</button>
+    </div>
+  </div>
+</div>

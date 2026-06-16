@@ -1,0 +1,348 @@
+.tareas-page {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: calc(100vh - 80px);
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.page-header h1 {
+  font-size: 2rem;
+  color: #0f172a;
+  margin: 0;
+}
+
+.page-header p {
+  color: #64748b;
+  margin: 0.5rem 0 0 0;
+}
+
+.btn-primary {
+  padding: 0.75rem 1.5rem;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+.form-section {
+  margin-bottom: 2rem;
+}
+
+.form-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+}
+
+.form-card h2 {
+  margin: 0 0 1.5rem 0;
+  color: #0f172a;
+  font-size: 1.5rem;
+}
+
+.task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.btn-success {
+  padding: 0.75rem 1.5rem;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+  flex: 1;
+}
+
+.btn-success:hover {
+  background: #059669;
+}
+
+.btn-secondary {
+  padding: 0.75rem 1.5rem;
+  background: #e5e7eb;
+  color: #374151;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+  flex: 1;
+}
+
+.btn-secondary:hover {
+  background: #d1d5db;
+}
+
+.filters-section {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #64748b;
+  transition: all 0.3s;
+}
+
+.filter-btn:hover {
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+.filter-btn.active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.count {
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.tasks-section {
+  margin-top: 2rem;
+}
+
+.tasks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.task-item {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border-left: 4px solid #2563eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s;
+}
+
+.task-item.status-pendiente {
+  border-left-color: #f59e0b;
+}
+
+.task-item.status-en\ progreso {
+  border-left-color: #3b82f6;
+}
+
+.task-item.status-completada {
+  border-left-color: #10b981;
+}
+
+.task-item:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+}
+
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.task-header h3 {
+  margin: 0 0 0.5rem 0;
+  color: #0f172a;
+  font-size: 1.15rem;
+}
+
+.task-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+}
+
+.btn-icon.edit:hover {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.btn-icon.delete:hover {
+  background: #fee2e2;
+  color: #7f1d1d;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badge-pendiente {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-en\ progreso {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-completada {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.task-description {
+  color: #64748b;
+  margin: 0.75rem 0;
+  line-height: 1.5;
+}
+
+.task-meta {
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.date {
+  display: block;
+}
+
+.empty-message {
+  text-align: center;
+  padding: 2rem;
+  color: #64748b;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 12px;
+  border: 2px dashed #e2e8f0;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  color: #0f172a;
+  margin: 0 0 0.5rem 0;
+}
+
+.empty-state p {
+  color: #64748b;
+  margin: 0 0 1.5rem 0;
+}
+
+@media (max-width: 768px) {
+  .tareas-page {
+    padding: 1rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-primary {
+    width: 100%;
+  }
+
+  .filters-section {
+    flex-direction: column;
+  }
+
+  .filter-btn {
+    width: 100%;
+  }
+
+  .tasks-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+}

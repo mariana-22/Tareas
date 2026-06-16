@@ -1,0 +1,45 @@
+<div class="dashboard-page">
+  <div class="dashboard-header">
+    <h1>📊 Dashboard</h1>
+    <p>Bienvenido a tu gestor de proyectos</p>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">📁</div>
+      <div class="stat-content">
+        <p class="stat-label">Proyectos</p>
+        <p class="stat-value">{{ totalProyectos }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">📝</div>
+      <div class="stat-content">
+        <p class="stat-label">Total de Tareas</p>
+        <p class="stat-value">{{ totalTareas }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-content">
+        <p class="stat-label">Pendientes</p>
+        <p class="stat-value">{{ tareasPorEstado['pendiente'] || 0 }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">✅</div>
+      <div class="stat-content">
+        <p class="stat-label">Completadas</p>
+        <p class="stat-value">{{ tareasPorEstado['completada'] || tareasPorEstado['completado'] || 0 }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="connection-status">
+    <span class="status-indicator" [class.connected]="connectionStatus === 'ok'"></span>
+    <span>Base de datos: {{ connectionStatus === 'ok' ? 'Conectado' : 'Desconectado' }}</span>
+  </div>
+</div>
