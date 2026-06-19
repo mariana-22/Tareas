@@ -15,7 +15,7 @@
     <div class="form-card">
       <h2>{{ editing ? 'Editar Tarea' : 'Crear Nueva Tarea' }}</h2>
       
-      <form (ngSubmit)="guardarTarea()" class="task-form">
+      <form (ngSubmit)="guardarTarea()" class="task-form" novalidate>
         <div class="form-group">
           <label for="titulo">Título de la Tarea</label>
           <input 
@@ -24,7 +24,6 @@
             [(ngModel)]="newTarea.titulo" 
             name="titulo"
             placeholder="¿Qué necesitas hacer?"
-            required
           />
         </div>
 
@@ -49,7 +48,7 @@
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="btn-success">
+          <button type="submit" class="btn-success" [disabled]="!newTarea.titulo.trim()">
             {{ editing ? 'Actualizar Tarea' : 'Crear Tarea' }}
           </button>
           <button type="button" class="btn-secondary" (click)="cancelarEdicion()" *ngIf="editing">

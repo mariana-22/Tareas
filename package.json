@@ -3,7 +3,10 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
+    "setup": "node scripts/setup-env.js",
+    "prestart": "npm run setup",
     "start": "ng serve",
+    "prebuild": "npm run setup",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
@@ -31,6 +34,7 @@
     "@angular/compiler-cli": "^21.2.0",
     "@types/express": "^5.0.1",
     "@types/node": "^20.17.19",
+    "dotenv": "^17.4.2",
     "jsdom": "^28.0.0",
     "prettier": "^3.8.1",
     "typescript": "~5.9.2",

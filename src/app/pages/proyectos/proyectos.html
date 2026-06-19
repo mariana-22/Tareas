@@ -15,7 +15,7 @@
     <div class="form-card">
       <h2>{{ editing ? 'Editar Proyecto' : 'Crear Nuevo Proyecto' }}</h2>
       
-      <form (ngSubmit)="guardarProyecto()" class="project-form">
+      <form (ngSubmit)="guardarProyecto()" class="project-form" novalidate>
         <div class="form-group">
           <label for="titulo">Título del Proyecto</label>
           <input 
@@ -24,7 +24,6 @@
             [(ngModel)]="newProyecto.titulo" 
             name="titulo"
             placeholder="Nombre del proyecto"
-            required
           />
         </div>
 
@@ -40,7 +39,7 @@
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="btn-success">
+          <button type="submit" class="btn-success" [disabled]="!newProyecto.titulo.trim()">
             {{ editing ? 'Actualizar Proyecto' : 'Crear Proyecto' }}
           </button>
           <button type="button" class="btn-secondary" (click)="cancelarEdicion()" *ngIf="editing">

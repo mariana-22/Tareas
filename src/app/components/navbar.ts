@@ -1,7 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../services/auth';
+import { User } from '../types';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-navbar',
@@ -162,18 +165,29 @@ import { AuthService } from '../services/auth';
     }
   `]
 })
-export class NavbarComponent implements OnInit {
-  currentUser: any = null;
+export class NavbarComponent implements OnInit, OnDestroy {
+  currentUser: User | null = null;
+  private destroy$ = new Subject<void>();
 
   constructor(private auth: AuthService, private router: Router) {}
 
   ngOnInit() {
-    this.currentUser = this.auth.getCurrentUser();
+    // Suscribirse al usuario actual y actualizar cuando cambie
+    this.auth.getCurrentUser$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        this.currentUser = user;
+      });
   }
 
-  logout() {
-    this.auth.logout();
-    this.currentUser = null;
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  async logout() {
+    await this.auth.logout();
     this.router.navigate(['/login']);
   }
 }
+

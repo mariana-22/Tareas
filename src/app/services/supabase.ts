@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment';
+import { Proyecto, Tarea } from '../types';
 
 @Injectable({
   providedIn: 'root'
@@ -17,19 +18,26 @@ export class SupabaseService {
 
   // ─── PROYECTOS ───────────────────────────────────────
 
-  getProyectos() {
-    return this.supabase.from('proyectos').select('*');
+  /**
+   * Obtener proyectos del usuario actual
+   */
+  getProyectos(userId: string) {
+    return this.supabase
+      .from('proyectos')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
   }
 
   getProyectoById(id: number) {
     return this.supabase.from('proyectos').select('*').eq('id', id).single();
   }
 
-  createProyecto(proyecto: any) {
+  createProyecto(proyecto: Proyecto) {
     return this.supabase.from('proyectos').insert(proyecto);
   }
 
-  updateProyecto(id: number, proyecto: any) {
+  updateProyecto(id: number, proyecto: Partial<Proyecto>) {
     return this.supabase.from('proyectos').update(proyecto).eq('id', id);
   }
 
@@ -39,19 +47,26 @@ export class SupabaseService {
 
   // ─── TAREAS ──────────────────────────────────────────
 
-  getTareas() {
-    return this.supabase.from('tareas').select('*');
+  /**
+   * Obtener tareas del usuario actual
+   */
+  getTareas(userId: string) {
+    return this.supabase
+      .from('tareas')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
   }
 
   getTareaById(id: number) {
     return this.supabase.from('tareas').select('*').eq('id', id).single();
   }
 
-  createTarea(tarea: any) {
+  createTarea(tarea: Tarea) {
     return this.supabase.from('tareas').insert(tarea);
   }
 
-  updateTarea(id: number, tarea: any) {
+  updateTarea(id: number, tarea: Partial<Tarea>) {
     return this.supabase.from('tareas').update(tarea).eq('id', id);
   }
 
@@ -77,11 +92,6 @@ export class SupabaseService {
     return this.supabase.from('usuarios').delete().eq('id', id);
   }
 
-  // Método de prueba rápida para validar conexión y permisos
-  ping() {
-    return this.supabase.from('proyectos').select('id').limit(1);
-  }
-
   // ─── AUTENTICACIÓN ──────────────────────────────────
 
   async signUp(email: string, password: string) {
@@ -98,5 +108,25 @@ export class SupabaseService {
 
   async getUser() {
     return this.supabase.auth.getUser();
+  }
+
+  async getSession() {
+    return this.supabase.auth.getSession();
+  }
+
+  // ─── UTILIDADES ──────────────────────────────────────
+
+  /**
+   * Validar conexión a Supabase
+   */
+  ping() {
+    return this.supabase.from('proyectos').select('id').limit(1);
+  }
+
+  /**
+   * Obtener cliente de Supabase (solo si es necesario acceso directo)
+   */
+  getClient() {
+    return this.supabase;
   }
 }

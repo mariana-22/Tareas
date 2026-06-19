@@ -1,7 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase';
+import { AuthService } from '../../services/auth';
+import { Tarea, User } from '../../types';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-tareas',
@@ -10,12 +14,18 @@ import { SupabaseService } from '../../services/supabase';
   templateUrl: './tareas.html',
   styleUrls: ['./tareas.scss']
 })
-export class TareasComponent implements OnInit {
-  tareas: any[] = [];
+export class TareasComponent implements OnInit, OnDestroy {
+  tareas: Tarea[] = [];
   loading = false;
   showForm = false;
-  newTarea: any = { titulo: '', descripcion: '', estado: 'pendiente' };
-  editing: any = null;
+  currentUser: User | null = null;
+
+  newTarea: { titulo: string; descripcion: string; estado: string } = { 
+    titulo: '', 
+    descripcion: '', 
+    estado: 'pendiente' 
+  };
+  editing: Tarea | null = null;
   filtroEstado = 'pendiente';
 
   estadosFiltro = [
@@ -24,18 +34,45 @@ export class TareasComponent implements OnInit {
     { label: '✅ Completada', value: 'completada' }
   ];
 
-  constructor(private supabase: SupabaseService) {}
+  private destroy$ = new Subject<void>();
+
+  constructor(
+    private supabase: SupabaseService,
+    private auth: AuthService
+  ) {}
 
   async ngOnInit() {
-    await this.cargarTareas();
+    // Esperar a que se complete la verificación de autenticación
+    await this.auth.waitForAuthCheck();
+
+    // Suscribirse al usuario actual
+    this.auth.getCurrentUser$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        this.currentUser = user;
+        if (user) {
+          this.cargarTareas();
+        }
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   async cargarTareas() {
+    if (!this.currentUser) return;
+
     this.loading = true;
-    const { data, error } = await this.supabase.getTareas();
+    const { data, error } = await this.supabase.getTareas(this.currentUser.id);
     this.loading = false;
-    if (error) console.error('Error cargando tareas:', error);
-    else this.tareas = data || [];
+
+    if (error) {
+      console.error('Error cargando tareas:', error);
+    } else {
+      this.tareas = data || [];
+    }
   }
 
   get tareasFiltradas() {
@@ -46,17 +83,26 @@ export class TareasComponent implements OnInit {
     return this.tareas.filter(t => (t.estado || 'pendiente') === estado).length;
   }
 
-  async eliminarTarea(id: number) {
+  async eliminarTarea(id: number | undefined) {
+    if (!id) return;
+
     if (confirm('¿Estás seguro de que deseas eliminar esta tarea?')) {
       const { error } = await this.supabase.deleteTarea(id);
-      if (error) console.error('Error eliminando tarea:', error);
-      else await this.cargarTareas();
+      if (error) {
+        console.error('Error eliminando tarea:', error);
+      } else {
+        await this.cargarTareas();
+      }
     }
   }
 
-  editarTarea(tarea: any) {
+  editarTarea(tarea: Tarea) {
     this.editing = { ...tarea };
-    this.newTarea = { ...tarea };
+    this.newTarea = {
+      titulo: tarea.titulo,
+      descripcion: tarea.descripcion,
+      estado: tarea.estado
+    };
     this.showForm = true;
   }
 
@@ -67,27 +113,41 @@ export class TareasComponent implements OnInit {
   }
 
   async guardarTarea() {
-    if (!this.newTarea.titulo.trim()) {
-      alert('Por favor ingresa un título para la tarea');
+    const user = this.auth.getCurrentUser();
+    if (!user) {
+      console.error('Usuario no autenticado');
       return;
     }
 
-    if (this.editing) {
-      const { error } = await this.supabase.updateTarea(this.editing.id, this.newTarea);
-      if (error) console.error('Error actualizando tarea:', error);
-      else {
+    if (this.editing && this.editing.id) {
+      // Actualizar tarea existente
+      const { error } = await this.supabase.updateTarea(this.editing.id, {
+        titulo: this.newTarea.titulo,
+        descripcion: this.newTarea.descripcion,
+        estado: this.newTarea.estado as 'pendiente' | 'en progreso' | 'completada'
+      });
+      if (error) {
+        console.error('Error actualizando tarea:', error);
+      } else {
         this.cancelarEdicion();
         await this.cargarTareas();
       }
-      return;
-    }
+    } else {
+      // Crear nueva tarea
+      const nuevaTarea: Tarea = {
+        titulo: this.newTarea.titulo,
+        descripcion: this.newTarea.descripcion,
+        estado: this.newTarea.estado as 'pendiente' | 'en progreso' | 'completada',
+        user_id: user.id
+      };
 
-    const { error } = await this.supabase.createTarea(this.newTarea);
-    if (error) console.error('Error creando tarea:', error);
-    else {
-      this.newTarea = { titulo: '', descripcion: '', estado: 'pendiente' };
-      this.showForm = false;
-      await this.cargarTareas();
+      const { error } = await this.supabase.createTarea(nuevaTarea);
+      if (error) {
+        console.error('Error creando tarea:', error);
+      } else {
+        this.cancelarEdicion();
+        await this.cargarTareas();
+      }
     }
   }
 }

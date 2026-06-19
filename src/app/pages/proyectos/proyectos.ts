@@ -1,7 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase';
+import { AuthService } from '../../services/auth';
+import { Proyecto, User } from '../../types';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
 	selector: 'app-proyectos',
@@ -10,80 +14,115 @@ import { SupabaseService } from '../../services/supabase';
 	templateUrl: './proyectos.html',
 	styleUrls: ['./proyectos.scss']
 })
-export class ProyectosComponent implements OnInit {
-	proyectos: any[] = [];
+export class ProyectosComponent implements OnInit, OnDestroy {
+	proyectos: Proyecto[] = [];
 	loading = false;
 	showForm = false;
+	currentUser: User | null = null;
 
-	newProyecto: any = { titulo: '', descripcion: '' };
-	editing: any = null;
+	newProyecto: { titulo: string; descripcion: string } = { titulo: '', descripcion: '' };
+	editing: Proyecto | null = null;
 
-	constructor(private supabase: SupabaseService) {}
+	private destroy$ = new Subject<void>();
+
+	constructor(
+		private supabase: SupabaseService,
+		private auth: AuthService
+	) {}
 
 	async ngOnInit() {
-		await this.cargarProyectos();
+		// Esperar a que se complete la verificación de autenticación
+		await this.auth.waitForAuthCheck();
+		
+		// Suscribirse al usuario actual
+		this.auth.getCurrentUser$()
+			.pipe(takeUntil(this.destroy$))
+			.subscribe(user => {
+				this.currentUser = user;
+				if (user) {
+					this.cargarProyectos();
+				}
+			});
+	}
+
+	ngOnDestroy() {
+		this.destroy$.next();
+		this.destroy$.complete();
 	}
 
 	async cargarProyectos() {
+		if (!this.currentUser) return;
+
 		this.loading = true;
-		const { data, error } = await this.supabase.getProyectos();
+		const { data, error } = await this.supabase.getProyectos(this.currentUser.id);
 		this.loading = false;
-		if (error) console.error('Error cargando proyectos:', error);
-		else this.proyectos = data || [];
+		
+		if (error) {
+			console.error('Error cargando proyectos:', error);
+		} else {
+			this.proyectos = data || [];
+		}
 	}
 
-	async crearProyecto() {
-		if (!this.newProyecto.titulo.trim()) {
-			alert('Por favor ingresa un título para el proyecto');
+	editarProyecto(proyecto: Proyecto) {
+		this.editing = { ...proyecto };
+		this.newProyecto = { 
+			titulo: proyecto.titulo, 
+			descripcion: proyecto.descripcion 
+		};
+		this.showForm = true;
+	}
+
+	cancelarEdicion() {
+		this.editing = null;
+		this.newProyecto = { titulo: '', descripcion: '' };
+		this.showForm = false;
+	}
+
+	async guardarProyecto() {
+		const user = this.auth.getCurrentUser();
+		if (!user) {
+			console.error('Usuario no autenticado');
 			return;
 		}
 
-		const proyecto = { ...this.newProyecto };
-		const { error } = await this.supabase.createProyecto(proyecto);
-		if (error) console.error('Error creando proyecto:', error);
-		else {
-			this.newProyecto = { titulo: '', descripcion: '' };
-			this.showForm = false;
-			await this.cargarProyectos();
+		if (this.editing && this.editing.id) {
+			// Actualizar proyecto existente
+			const { error } = await this.supabase.updateProyecto(this.editing.id, this.newProyecto);
+			if (error) {
+				console.error('Error actualizando proyecto:', error);
+			} else {
+				this.cancelarEdicion();
+				await this.cargarProyectos();
+			}
+		} else {
+			// Crear nuevo proyecto
+			const proyecto: Proyecto = {
+				titulo: this.newProyecto.titulo,
+				descripcion: this.newProyecto.descripcion,
+				user_id: user.id
+			};
+
+			const { error } = await this.supabase.createProyecto(proyecto);
+			if (error) {
+				console.error('Error creando proyecto:', error);
+			} else {
+				this.cancelarEdicion();
+				await this.cargarProyectos();
+			}
 		}
 	}
 
-	editarProyecto(proyecto: any) {
-    this.editing = proyecto;
-    this.newProyecto = { titulo: proyecto.titulo, descripcion: proyecto.descripcion };
-    this.showForm = true;
-  }
+	async eliminarProyecto(id: number | undefined) {
+		if (!id) return;
 
-  cancelarEdicion() {
-    this.editing = null;
-    this.newProyecto = { titulo: '', descripcion: '' };
-    this.showForm = false;
-  }
-
-  async guardarProyecto() {
-    if (!this.newProyecto.titulo.trim()) {
-      alert('Por favor ingresa un título para el proyecto');
-      return;
-    }
-
-    if (this.editing) {
-      const { error } = await this.supabase.updateProyecto(this.editing.id, this.newProyecto);
-      if (error) console.error('Error actualizando proyecto:', error);
-      else {
-        this.cancelarEdicion();
-        await this.cargarProyectos();
-      }
-      return;
-    }
-
-		await this.crearProyecto();
-	}
-
-	async eliminarProyecto(id: number) {
 		if (confirm('¿Estás seguro de que deseas eliminar este proyecto?')) {
 			const { error } = await this.supabase.deleteProyecto(id);
-			if (error) console.error('Error eliminando proyecto:', error);
-			else await this.cargarProyectos();
+			if (error) {
+				console.error('Error eliminando proyecto:', error);
+			} else {
+				await this.cargarProyectos();
+			}
 		}
 	}
 }
