@@ -89,6 +89,22 @@
 
 .form-group small.error {
   color: #ef4444;
+  font-weight: 500;
+}
+
+.form-group small.success {
+  color: #10b981;
+  font-weight: 500;
+}
+
+.form-group small.hint {
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.form-group input.mismatch {
+  border-color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.05);
 }
 
 .btn-submit {
@@ -146,6 +162,18 @@
   border-radius: 8px;
   margin-bottom: 1rem;
   font-size: 0.95rem;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .alert-success {

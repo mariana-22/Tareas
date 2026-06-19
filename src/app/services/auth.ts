@@ -62,7 +62,7 @@ export class AuthService {
         throw new Error('Todos los campos son requeridos');
       }
       if (!this.isValidEmail(email)) {
-        throw new Error('Email inválido');
+        throw new Error('El email que ingresaste no es válido');
       }
       if (password.length < 6) {
         throw new Error('La contraseña debe tener al menos 6 caracteres');
@@ -74,7 +74,16 @@ export class AuthService {
       const { data, error: authError } = await this.supabase.signUp(email, password);
       
       if (authError) {
-        throw new Error(`Error en Supabase: ${authError.message}`);
+        // Mensajes de error más específicos
+        if (authError.message.includes('already registered')) {
+          throw new Error('Este email ya está registrado con una cuenta');
+        } else if (authError.message.includes('Invalid email')) {
+          throw new Error('El email ingresado no es válido');
+        } else if (authError.message.includes('Password')) {
+          throw new Error('La contraseña no cumple los requisitos de seguridad');
+        } else {
+          throw new Error(`Error en el registro: ${authError.message}`);
+        }
       }
 
       if (!data.user) {
@@ -113,17 +122,26 @@ export class AuthService {
         throw new Error('Email y contraseña son requeridos');
       }
       if (!this.isValidEmail(email)) {
-        throw new Error('Email inválido');
+        throw new Error('El email que ingresaste no es válido');
       }
 
       const { data, error } = await this.supabase.signIn(email, password);
       
       if (error) {
-        throw new Error(error.message);
+        // Mensajes de error más específicos
+        if (error.message.includes('Invalid login credentials')) {
+          throw new Error('Email o contraseña incorrectos. Verifica tus datos e intenta de nuevo');
+        } else if (error.message.includes('Email not confirmed')) {
+          throw new Error('Tu email aún no ha sido confirmado. Revisa tu correo');
+        } else if (error.message.includes('user not found')) {
+          throw new Error('Este email no está registrado. ¿Deseas crear una cuenta?');
+        } else {
+          throw new Error(error.message);
+        }
       }
 
       if (!data.user || !data.session) {
-        throw new Error('Error en la respuesta de autenticación');
+        throw new Error('Error en la respuesta de autenticación. Intenta de nuevo');
       }
 
       const user: User = {

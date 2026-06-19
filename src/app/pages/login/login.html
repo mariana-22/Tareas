@@ -10,12 +10,12 @@
 
       <!-- Mensaje de éxito -->
       <div *ngIf="successMessage" class="alert alert-success">
-        ✓ {{ successMessage }}
+        {{ successMessage }}
       </div>
 
       <!-- Mensaje de error -->
       <div *ngIf="errorMessage" class="alert alert-error">
-        ✗ {{ errorMessage }}
+        {{ errorMessage }}
       </div>
 
       <!-- Formulario -->
@@ -29,6 +29,7 @@
             name="email"
             placeholder="tu@email.com"
             [disabled]="loading"
+            class="form-input"
           />
         </div>
 
@@ -41,8 +42,9 @@
             name="password"
             placeholder="Mínimo 6 caracteres"
             [disabled]="loading"
+            class="form-input"
           />
-          <small *ngIf="isRegistering && password && password.length < 6">
+          <small *ngIf="isRegistering && password && password.length < 6" class="hint">
             Mínimo 6 caracteres ({{ password.length }}/6)
           </small>
         </div>
@@ -56,9 +58,14 @@
             name="passwordConfirm"
             placeholder="Confirma tu contraseña"
             [disabled]="loading"
+            class="form-input"
+            [class.mismatch]="password && passwordConfirm && password !== passwordConfirm"
           />
           <small *ngIf="password && passwordConfirm && password !== passwordConfirm" class="error">
-            Las contraseñas no coinciden
+            ✗ Las contraseñas no coinciden
+          </small>
+          <small *ngIf="password && passwordConfirm && password === passwordConfirm" class="success">
+            ✓ Las contraseñas coinciden
           </small>
         </div>
 
@@ -75,7 +82,7 @@
       <div class="login-footer">
         <p>
           {{ isRegistering ? '¿Ya tienes cuenta?' : '¿No tienes cuenta?' }}
-          <button type="button" class="link" (click)="toggleMode()">
+          <button type="button" class="link" (click)="toggleMode()" [disabled]="loading">
             {{ isRegistering ? 'Iniciar Sesión' : 'Registrarse' }}
           </button>
         </p>
